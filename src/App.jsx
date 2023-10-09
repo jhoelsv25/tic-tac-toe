@@ -4,10 +4,19 @@ import { TURNS } from "./constants"
 import { useState } from "react"
 import { ModalSquare } from "./components/ModalSquare"
 import confetti from "canvas-confetti"
+import { loadLocalstorage, resetLocalstorage, saveLocalstorage } from "./utils/storage/storage"
 
 export const App = () => {
-  const [board, setBoard] = useState(Array(9).fill(null))
-  const [isXTurn, setIsXTurn] = useState(TURNS.X)
+  const [board, setBoard] = useState(() => {
+    const boardStorage = window.localStorage.getItem('board')
+    if (boardStorage) return JSON.parse(boardStorage)
+    return Array(9).fill(null)
+  })
+  const [isXTurn, setIsXTurn] = useState(() => {
+    const turndStorage = window.localStorage.getItem('turn')
+    return turndStorage ?? TURNS.X
+
+  })
   const [winner, setWinner] = useState(null)
 
   const updateBoard = (index) => {
@@ -18,6 +27,7 @@ export const App = () => {
     //cambiar el turno 
     const newTurn = isXTurn === TURNS.X ? TURNS.O : TURNS.X;
     setIsXTurn(newTurn);
+    saveLocalstorage({board: newBoard, turn: newTurn})
     //revisar si hay ganador
     const newWinner = checkWinner(newBoard);
     if (newWinner) {
@@ -31,6 +41,7 @@ export const App = () => {
     setBoard(Array(9).fill(null))
     setWinner(null)
     setIsXTurn(TURNS.X)
+    resetLocalstorage()
   }
 
   return (
